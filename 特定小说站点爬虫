@@ -1,7 +1,7 @@
-# !/usr/bin/env python
-# -*- coding:utf-8
+# -*- coding:GBK
 import requests
 import re
+
 # Download a novel url
 url = 'http://www.yznnw.com/files/article/html/1/1129/index.html'
 
@@ -14,23 +14,16 @@ response.encoding = 'gbk'
 # Converts the response data into text
 html = response.text
 
-# Get part of the novel url(substring)
-#pageU = re.findall(r'<span id=".*?title', html, re.S)
-#pageUV = ''.join(pageU)
-#pageUrl = re.findall('href="(.*?).html', pageUV)
-#pageUrl = ''.join(pageUrl)
-
 # get title
 title = re.findall(r'<title>(.*?)</title>', html, re.S)
 titleV = ''.join(title).split("_")
 titleV = titleV[0].replace("小说", "")
 
 # Create a new TXT file (use for store novel)
-# fb = open('%s.txt' % titleV, 'w', encoding= 'GBK')
-with open('%s.txt' % titleV, 'w') as fb:
+fb = open('%s.txt' % titleV, 'w', encoding='GBK')
 
 # Get the address and title of each chapter
-    div = re.findall('<li>(.*?)</div>', html, re.S)
+div = re.findall('<li>(.*?)</div>', html, re.S)
 divV = ''.join(div)
 list = re.findall('href="(.*?)">(.*?)<', divV)
 
@@ -38,4 +31,23 @@ list = re.findall('href="(.*?)">(.*?)<', divV)
 for chapter_info in list:
     list_url, list_chapter = chapter_info
     list_url = url.replace("index.html", "") + list_url
-    print(list_url, list_chapter)
+
+    # Download Chapter
+    chapter_response = requests.get(list_url)
+    chapter_response.encoding = 'GBK'
+    chapter_html = chapter_response.text
+
+    # Extract the chapter contents
+    chapter_title = re.findall(r'<h1>(.*?)</h1>', chapter_html, re.S)[0]
+    chapter_title = re.findall(r'<span id="htmltimu">(.*?)</span>', chapter_html, re.S)[0]
+    chapter_content = re.findall(r'</center>(.*?)</div>', chapter_html, re.S)[0]
+    chapter_content = chapter_content.replace("全Δ本Δ小说,网ＷｗんＷ．『yznn→w→．com<br/>", "")
+    chapter_content = chapter_content.replace("&nbsp;&nbsp;&nbsp;&nbsp;", "")
+    chapter_content = chapter_content.replace("<br />", "")
+    chapter_content = chapter_content.replace("&lt;/em&gt;", "")
+    chapter_content = chapter_content.replace("\n", "")
+    chapter_content = chapter_content.replace("&lt;em&gt;", "")
+
+    # writing text
+    fb.write(chapter_title)
+    fb.write(chapter_content)
