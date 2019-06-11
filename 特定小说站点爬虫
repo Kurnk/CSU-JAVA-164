@@ -25,11 +25,12 @@ title = re.findall(r'<title>(.*?)</title>', html, re.S)
 titleV = ''.join(title).split("_")
 titleV = titleV[0].replace("小说", "")
 
-# Create a new TXT file (to store novel)
-fb = open('%s.txt' % titleV, 'w', encoding= 'GBK')
+# Create a new TXT file (use for store novel)
+# fb = open('%s.txt' % titleV, 'w', encoding= 'GBK')
+with open('%s.txt' % titleV, 'w') as fb:
 
 # Get the address and title of each chapter
-div = re.findall('<li>(.*?)</div>', html, re.S)
+    div = re.findall('<li>(.*?)</div>', html, re.S)
 divV = ''.join(div)
 list = re.findall('href="(.*?)">(.*?)<', divV)
 
