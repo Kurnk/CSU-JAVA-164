@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+
+import requests
+import pprint
+from urllib.parse import urlencode
+from pyquery import PyQuery
+
+base_url = 'https://m.weibo.cn/api/container/getIndex?'
+
+# Get page data
+def get_page(page):
+        prames = {"containerid": "1076036888121986",
+                  "page": page
+                  }
+        response = requests.get(base_url + urlencode(prames))
+        return response.json()
+
+# Parse data
+def parse_data(res_json):
+    if res_json.get("data"):
+        for node in res_json["data"]["cards"]:
+            parse_data(node)
+            item = dict()
+            item["text"] = PyQuery(node["mblog"]["text"]).text()
+            item["id"] = node["mblog"]["id"]
+            item["screen_name"] = node["mblog"]["user"]["screen_name"]
+            item["created_at"] = node["mblog"]["created_at"]
+            print(item)
+
+def main():
+    for page in range(1,2):
+        res_json = get_page(page)
+        parse_data(res_json)
+
+if __name__ == '__main__':
+    main()
